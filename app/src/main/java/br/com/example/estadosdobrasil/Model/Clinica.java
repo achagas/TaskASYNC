@@ -1,7 +1,15 @@
 package br.com.example.estadosdobrasil.Model;
 
-public class Clinica {
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.os.Parcel;
+import android.os.Parcelable;
 
+@Entity
+public class Clinica implements Parcelable {
+
+    @PrimaryKey(autoGenerate = true)
+    private int Id;
     private String descricao;
     private String foto;
     private String uniq_id;
@@ -27,8 +35,57 @@ public class Clinica {
     private String beneficios;
     private String total_likes;
 
+    public Clinica(){}
+
+    protected Clinica(Parcel in) {
+        descricao = in.readString();
+        foto = in.readString();
+        uniq_id = in.readString();
+        id_estabelecimento = in.readString();
+        razao_social = in.readString();
+        nome_fantasia = in.readString();
+        cnpj_cpf = in.readString();
+        contato = in.readString();
+        telefone = in.readString();
+        celular = in.readString();
+        email = in.readString();
+        endereco = in.readString();
+        numero = in.readString();
+        bairro = in.readString();
+        id_cidade = in.readString();
+        id_estado = in.readString();
+        cep = in.readString();
+        nmcidade = in.readString();
+        nmestado = in.readString();
+        pais = in.readString();
+        status = in.readString();
+        segmento = in.readString();
+        beneficios = in.readString();
+        total_likes = in.readString();
+    }
+
+    public static final Creator<Clinica> CREATOR = new Creator<Clinica>() {
+        @Override
+        public Clinica createFromParcel(Parcel in) {
+            return new Clinica(in);
+        }
+
+        @Override
+        public Clinica[] newArray(int size) {
+            return new Clinica[size];
+        }
+    };
+
+
 
     // Getter Methods
+    public int getId() {
+        return Id;
+    }
+
+    public void setId(int id) {
+        Id = id;
+    }
 
     public String getDescricao() {
         return descricao;
@@ -130,9 +187,43 @@ public class Clinica {
     public String toString() {
         return " nome_fantasia=" + nome_fantasia + "\n";
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(descricao);
+        dest.writeString(foto);
+        dest.writeString(uniq_id);
+        dest.writeString(id_estabelecimento);
+        dest.writeString(razao_social);
+        dest.writeString(nome_fantasia);
+        dest.writeString(cnpj_cpf);
+        dest.writeString(contato);
+        dest.writeString(telefone);
+        dest.writeString(celular);
+        dest.writeString(email);
+        dest.writeString(endereco);
+        dest.writeString(numero);
+        dest.writeString(bairro);
+        dest.writeString(id_cidade);
+        dest.writeString(id_estado);
+        dest.writeString(cep);
+        dest.writeString(nmcidade);
+        dest.writeString(nmestado);
+        dest.writeString(pais);
+        dest.writeString(status);
+        dest.writeString(segmento);
+        dest.writeString(beneficios);
+        dest.writeString(total_likes);
+    }
+
     // Setter Methods
 
-   /* public void setDescricao(String descricao) {
+   public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
 
@@ -226,5 +317,5 @@ public class Clinica {
 
     public void setTotal_likes(String total_likes) {
         this.total_likes = total_likes;
-    }*/
+    }
 }

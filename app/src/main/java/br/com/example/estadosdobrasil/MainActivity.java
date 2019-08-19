@@ -1,6 +1,8 @@
 package br.com.example.estadosdobrasil;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -27,6 +31,8 @@ import java.util.List;
 import br.com.example.estadosdobrasil.Adapter.ClinicasAdapter;
 import br.com.example.estadosdobrasil.Model.Clinica;
 import br.com.example.estadosdobrasil.Util.NetworkUtil;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,13 +41,15 @@ public class MainActivity extends AppCompatActivity {
     TextView txTextoExibido;
     ListView listview;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         txTextoExibido = findViewById(R.id.tv_texto_exibido);
         progressBarLoading = findViewById(R.id.pb_loading);
-        listview = (ListView)  findViewById(R.id.lv_lista_clinicas);
+
+        listview = (ListView) findViewById(R.id.lv_lista_clinicas);
     }
 
     @Override
@@ -53,14 +61,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_web_service:
-                callWebService();
-                break;
             case R.id.menu_clear:
                 clearText();
                 break;
             case R.id.menu_evo:
                 callWebServiceEvo();
+                break;
+
+            case R.id.menu_favorites:
+                listAllFavoritesClinics();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -94,17 +103,63 @@ public class MainActivity extends AppCompatActivity {
         txTextoExibido.setText("");
     }
 
-    public ListView listarClinicas(List<Clinica> a){
+    public ListView listarClinicas(final List<Clinica> a){
 
         ClinicasAdapter adapter = new ClinicasAdapter(a, this);
         listview.setAdapter(adapter);
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, Details.class);
+                intent.putExtra("clinica", a.get(position));
+                startActivity(intent);
+            }
+        });
+
         return listview;
+    }
+
+    public void clearList(){
+        listview.setAdapter(null);
+    }
+
+    class GetAllFavoritesAsyncTask extends AsyncTask<Void, Void, List<Clinica>>{
+        Context context;
+
+        GetAllFavoritesAsyncTask(Context context){
+            this.context = context;
+        }
+
+        @Override
+        protected List<Clinica> doInBackground(Void... voids) {
+            return ClinicaDataBase.getInstance(context).getDao().getAllclinica();
+        }
+
+        @Override
+        protected void onPostExecute(List<Clinica> clinicas) {
+            if (clinicas.size() == 0) {
+                clearList();
+                txTextoExibido.setText(R.string.without_favorite);
+            } else {
+                txTextoExibido.setText(null);
+                listarClinicas(clinicas);
+            }
+
+            super.onPostExecute(clinicas);
+        }
+    }
+
+    public void listAllFavoritesClinics(){
+        GetAllFavoritesAsyncTask task = new GetAllFavoritesAsyncTask(this);
+        task.execute();
     }
 
     class MinhaAsyncTask extends AsyncTask<URL, Void, List<Clinica>>{
 
         @Override
         protected List<Clinica> doInBackground(URL... urls) {
+
             URL url = urls[0];
             Log.d(TAG, "url utilizada: " + url.toString());
             String json = null;
